@@ -1,3 +1,32 @@
 spring:
   application:
     name: verdeo-api
+
+  datasource:
+    url: jdbc:postgresql://ep-shiny-pond-ap277f65.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require
+    username: neondb_owner
+    password: npg_WjJ7t8dHbLvh
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ssshernandezperez@gmail.com
+    password: dmds wgxk qcuf xalk
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+jwt:
+  secret: V3rd30_JWT_S3cur3_K3y_2026_Backend_Production
+  expiration-ms: 900000

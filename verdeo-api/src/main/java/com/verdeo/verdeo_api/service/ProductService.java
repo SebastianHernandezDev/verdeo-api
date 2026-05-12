@@ -1,6 +1,5 @@
 package com.verdeo.verdeo_api.service;
 
-import com.verdeo.verdeo_api.exception.BadRequestException;
 import com.verdeo.verdeo_api.exception.ResourceNotFoundException;
 import com.verdeo.verdeo_api.model.Category;
 import com.verdeo.verdeo_api.model.Product;
@@ -31,12 +30,14 @@ public class ProductService {
         return productRepository.findByStatus(status);
     }
 
+    // ✅ CORREGIDO
     public List<Product> getByCategory(UUID categoryId) {
-        return productRepository.findByCategoryId(categoryId);
+        return productRepository.findByCategory_IdCategory(categoryId);
     }
 
+    // ✅ CORREGIDO
     public List<Product> getByCategoryAndStatus(UUID categoryId, ProductStatus status) {
-        return productRepository.findByCategoryIdAndStatus(categoryId, status);
+        return productRepository.findByCategory_IdCategoryAndStatus(categoryId, status);
     }
 
     public List<Product> searchByName(String name) {

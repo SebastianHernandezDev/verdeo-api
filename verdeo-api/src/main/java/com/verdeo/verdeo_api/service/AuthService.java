@@ -10,6 +10,7 @@ import com.verdeo.verdeo_api.model.Role;
 import com.verdeo.verdeo_api.model.User;
 import com.verdeo.verdeo_api.repository.RefreshTokenRepository;
 import com.verdeo.verdeo_api.repository.UserRepository;
+import com.verdeo.verdeo_api.security.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,16 +23,21 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;                          // ← nuevo
 
     public AuthService(UserRepository userRepository,
                        RefreshTokenRepository refreshTokenRepository,
-                       PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.refreshTokenRepository = refreshTokenRepository;
-        this.passwordEncoder = passwordEncoder;
+                       PasswordEncoder passwordEncoder,
+                       JwtUtil jwtUtil) {
+        this.userRepository          = userRepository;
+        this.refreshTokenRepository  = refreshTokenRepository;
+        this.passwordEncoder         = passwordEncoder;
+        this.jwtUtil                 = jwtUtil;
     }
 
+    // ──────────────────────────────────────────
     // REGISTRO
+    // ──────────────────────────────────────────
     public AuthResponse register(RegisterRequest request) {
 
         if (userRepository.existsByEmailIgnoreCase(request.getEmail())) {
@@ -49,7 +55,9 @@ public class AuthService {
         return generateTokens(user);
     }
 
+    // ──────────────────────────────────────────
     // LOGIN
+    // ──────────────────────────────────────────
     public AuthResponse login(LoginRequest request) {
 
         User user = userRepository
@@ -63,48 +71,62 @@ public class AuthService {
         return generateTokens(user);
     }
 
+    // ──────────────────────────────────────────
     // REFRESH TOKEN
+    // ──────────────────────────────────────────
     public AuthResponse refresh(String refreshToken) {
 
         RefreshToken token = refreshTokenRepository
-                .findByTokenHashAndRevokedFalseAndExpiresAtAfter(
-                        refreshToken,
-                        LocalDateTime.now()
-                )
+                .findByTokenHashAndRevokedFalseAndExpiresAtAfter(refreshToken, LocalDateTime.now())
                 .orElseThrow(() -> new BadRequestException("Token inválido o expirado"));
 
-        // validación adicional usando tu modelo
         if (token.isExpired()) {
             throw new BadRequestException("Token expirado");
         }
 
-        return generateTokens(token.getUser());
+        // Solo regeneramos el accessToken JWT — el refreshToken sigue siendo el mismo
+        String newAccessToken = jwtUtil.generateToken(
+                token.getUser().getIdUser(),
+                token.getUser().getRole().name()
+        );
+
+        return new AuthResponse(newAccessToken, refreshToken);
     }
 
+    // ──────────────────────────────────────────
     // LOGOUT
+    // ──────────────────────────────────────────
     public void logout(String refreshToken) {
 
         RefreshToken token = refreshTokenRepository
                 .findByTokenHashAndRevokedFalse(refreshToken)
                 .orElseThrow(() -> new ResourceNotFoundException("Token no encontrado"));
-        token.revoke();
 
+        token.revoke();
         refreshTokenRepository.save(token);
     }
 
-    // GENERACIÓN DE TOKENS (TEMPORAL - luego JWT real)
+    // ──────────────────────────────────────────
+    // GENERACIÓN DE TOKENS (JWT real)
+    // ──────────────────────────────────────────
     private AuthResponse generateTokens(User user) {
 
-        String accessToken = UUID.randomUUID().toString();
-        String refreshToken = UUID.randomUUID().toString();
+        // accessToken: JWT firmado, expira en 15 min (configurado en properties)
+        String accessToken = jwtUtil.generateToken(
+                user.getIdUser(),
+                user.getRole().name()   // "USER" o "ADMIN"
+        );
 
-        RefreshToken token = new RefreshToken();
-        token.setUser(user);
-        token.setTokenHash(refreshToken);
-        token.setExpiresAt(LocalDateTime.now().plusDays(7));
+        // refreshToken: UUID opaco guardado en BD, expira en 7 días
+        String refreshTokenValue = UUID.randomUUID().toString();
 
-        refreshTokenRepository.save(token);
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setUser(user);
+        refreshToken.setTokenHash(refreshTokenValue);
+        refreshToken.setExpiresAt(LocalDateTime.now().plusDays(7));
 
-        return new AuthResponse(accessToken, refreshToken);
+        refreshTokenRepository.save(refreshToken);
+
+        return new AuthResponse(accessToken, refreshTokenValue);
     }
 }

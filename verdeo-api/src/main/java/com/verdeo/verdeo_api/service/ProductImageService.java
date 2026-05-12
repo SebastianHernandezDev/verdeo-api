@@ -25,14 +25,16 @@ public class ProductImageService {
     // OBTENER TODAS LAS IMÁGENES
     // =========================
     public List<ProductImage> getProductImages(UUID productId) {
-        return productImageRepository.findByProductIdOrderBySortOrderAsc(productId);
+        return productImageRepository
+                .findByProduct_IdProductOrderBySortOrderAsc(productId);
     }
 
     // =========================
     // IMAGEN PRINCIPAL
     // =========================
     public ProductImage getPrimaryImage(UUID productId) {
-        return productImageRepository.findByProductIdAndIsPrimaryTrue(productId)
+        return productImageRepository
+                .findByProduct_IdProductAndIsPrimaryTrue(productId)
                 .orElse(null);
     }
 
@@ -89,7 +91,8 @@ public class ProductImageService {
     // =========================
     private void unsetPrimaryImages(UUID productId) {
 
-        List<ProductImage> images = productImageRepository.findByProductId(productId);
+        List<ProductImage> images =
+                productImageRepository.findByProduct_IdProduct(productId);
 
         for (ProductImage img : images) {
             if (img.isPrimary()) {

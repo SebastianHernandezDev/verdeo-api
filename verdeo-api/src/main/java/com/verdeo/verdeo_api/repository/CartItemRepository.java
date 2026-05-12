@@ -14,20 +14,23 @@ public interface CartItemRepository extends JpaRepository<CartItem, UUID> {
     // Obtener items por carrito
     List<CartItem> findByCart(Cart cart);
 
-    // Obtener items por carrito
+    // Obtener items por ID de carrito
     List<CartItem> findByCartId(UUID cartId);
 
-    //Buscar item específico
+    // Buscar item específico
     Optional<CartItem> findByCartAndProduct(Cart cart, Product product);
 
-    // Alternativa por ID
-    Optional<CartItem> findByCartIdAndProductId(UUID cartId, UUID productId);
+    // 🔥 CORREGIDO
+    Optional<CartItem> findByCartIdAndProductIdProduct(
+            UUID cartId,
+            UUID productId
+    );
 
     // Vaciar carrito
     void deleteByCart(Cart cart);
 
     void deleteByCartId(UUID cartId);
 
-    //Ordenado
+    // Ordenado
     List<CartItem> findByCartOrderByIdAsc(Cart cart);
 }

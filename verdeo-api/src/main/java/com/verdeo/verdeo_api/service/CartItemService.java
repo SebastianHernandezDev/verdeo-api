@@ -1,6 +1,5 @@
 package com.verdeo.verdeo_api.service;
 
-
 import com.verdeo.verdeo_api.model.Cart;
 import com.verdeo.verdeo_api.model.CartItem;
 import com.verdeo.verdeo_api.model.Product;
@@ -20,17 +19,17 @@ public class CartItemService {
         this.cartItemRepository = cartItemRepository;
     }
 
-    // obtener items
-
+    // Obtener items
     public List<CartItem> getItemsByCart(Cart cart){
         return cartItemRepository.findByCartOrderByIdAsc(cart);
-
     }
-    // por id
+
+    // Obtener por ID
     public List<CartItem> getItemsByCartId(UUID cartId) {
         return cartItemRepository.findByCartId(cartId);
     }
 
+    // Agregar item
     @Transactional
     public CartItem addItem(Cart cart, Product product, int quantity) {
 
@@ -46,12 +45,12 @@ public class CartItemService {
                 });
     }
 
-    // actualizar
+    // Actualizar cantidad
     @Transactional
     public CartItem updateQuantity(UUID cartId, UUID productId, int quantity) {
 
         CartItem item = cartItemRepository
-                .findByCartIdAndProductId(cartId, productId)
+                .findByCartIdAndProductIdProduct(cartId, productId)
                 .orElseThrow(() -> new RuntimeException("Item no encontrado en el carrito"));
 
         item.setQuantity(quantity);
@@ -59,20 +58,18 @@ public class CartItemService {
         return cartItemRepository.save(item);
     }
 
-    // eliminar item
+    // Eliminar item
     @Transactional
     public void removeItem(UUID cartId, UUID productId) {
 
         CartItem item = cartItemRepository
-                .findByCartIdAndProductId(cartId, productId)
+                .findByCartIdAndProductIdProduct(cartId, productId)
                 .orElseThrow(() -> new RuntimeException("Item no encontrado"));
 
         cartItemRepository.delete(item);
     }
 
-
-    // Vaciar carro
-
+    // Vaciar carrito
     @Transactional
     public void clearCart(Cart cart) {
         cartItemRepository.deleteByCart(cart);
@@ -82,8 +79,7 @@ public class CartItemService {
         cartItemRepository.deleteByCartId(cartId);
     }
 
-
-
+    // Verificar existencia
     public boolean existsItem(Cart cart, Product product) {
         return cartItemRepository.findByCartAndProduct(cart, product).isPresent();
     }

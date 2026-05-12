@@ -12,9 +12,9 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     List<Product> findByStatus(ProductStatus status);
 
-    List<Product> findByCategoryId(UUID categoryId);
+    List<Product> findByCategory_IdCategory(UUID categoryId);
 
-    List<Product> findByCategoryIdAndStatus(UUID categoryId, ProductStatus status);
+    List<Product> findByCategory_IdCategoryAndStatus(UUID categoryId, ProductStatus status);
 
     List<Product> findByNameContainingIgnoreCase(String name);
 

@@ -10,11 +10,11 @@ import java.util.UUID;
 public interface ProductImageRepository extends JpaRepository<ProductImage, UUID> {
 
     // Todas las imágenes de un producto
-    List<ProductImage> findByProductId(UUID productId);
+    List<ProductImage> findByProduct_IdProduct(UUID productId);
 
     // Imagen principal del producto
-    Optional<ProductImage> findByProductIdAndIsPrimaryTrue(UUID productId);
+    Optional<ProductImage> findByProduct_IdProductAndIsPrimaryTrue(UUID productId);
 
-    //  Ordenadas (para galería)
-    List<ProductImage> findByProductIdOrderBySortOrderAsc(UUID productId);
+    // Ordenadas para galería
+    List<ProductImage> findByProduct_IdProductOrderBySortOrderAsc(UUID productId);
 }
